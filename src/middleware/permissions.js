@@ -1,7 +1,7 @@
-let  {rule, shield, and, or} = require("graphql-shield")
+let { rule, shield, and, or } = require("graphql-shield")
 
 
-const isAuthenticated = rule()((parent, args, {currentUser})=>{
+const isAuthenticated = rule()((parent, args, { currentUser }) => {
     console.log('currentUser')
     console.log(currentUser)
     return currentUser != null
@@ -9,8 +9,11 @@ const isAuthenticated = rule()((parent, args, {currentUser})=>{
 
 
 module.exports = shield({
-    Query:{
-        findMovies: isAuthenticated,
+    Query: {
+        // findMovies: isAuthenticated,
         findMovieById: isAuthenticated
+    },
+    Mutation: {
+        createComment: isAuthenticated,
     }
 })

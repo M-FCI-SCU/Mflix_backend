@@ -3,6 +3,8 @@ var jwt = require('jsonwebtoken');
 const { ApolloServer } = require('apollo-server-express');
 const { makeExecutableSchema } = require("@graphql-tools/schema")
 const { applyMiddleware } = require('graphql-middleware')
+const { execute, subscribe } = require("graphql");
+const { SubscriptionServer } = require("subscriptions-transport-ws");
 const { StartMongodb } = require('./src/database/mongo_db')
 const typeDefs = require('./src/schema');
 const resolvers = require('./src/resolvers');
@@ -56,7 +58,7 @@ function startExpressServer() {
     //================jsonwebtoken======================
     app.use(async (req, res, next) => {
         if (req.headers.authorization) {
-            var decoded =  jwt.verify(req.headers.authorization, process.env.JWTSECRETKEY);
+            var decoded = jwt.verify(req.headers.authorization, process.env.JWTSECRETKEY);
             console.log('decoded')
             console.log(decoded)
             let results = await User.findUserByEmail(decoded.email)
@@ -76,15 +78,41 @@ function startExpressServer() {
 
 async function startApolloServer(typeDefs, resolvers, app) {
     const httpServer = http.createServer(app);
+    const schema = makeExecutableSchema({
+        typeDefs,
+        resolvers,
+    });
+    const subscriptionServer = SubscriptionServer.create(
+        {
+            schema,
+            execute,
+            subscribe,
+            async onConnect(connectionParams, webSocket, context) {
+                console.log('Connected!')
+            },
+            async onDisconnect(webSocket, context) {
+                console.log('Disconnected!')
+            }
+        },
+        { server: httpServer, path: '/graphql' },
+    );
     const server = new ApolloServer({
         schema: applyMiddleware(
-            makeExecutableSchema({ typeDefs, resolvers }),
+            schema,
             permissions
         ),
 
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-        context: async ({req}) => {
-             return {req, currentUser: req.currentUser}
+        plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), {
+            async serverWillStart() {
+                return {
+                    async drainServer() {
+                        subscriptionServer.close();
+                    }
+                };
+            }
+        }],
+        context: async ({ req }) => {
+            return { req, currentUser: req.currentUser }
         }
     });
 
@@ -92,8 +120,8 @@ async function startApolloServer(typeDefs, resolvers, app) {
 
     server.applyMiddleware({ app });
 
-    await new Promise(resolve => httpServer.listen({ port: 4000 }, resolve));
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
+    await new Promise(resolve => httpServer.listen({ port: 5000 }, resolve));
+    console.log(`🚀 Server ready at http://localhost:5000${server.graphqlPath}`);
 }
 
 async function startServers() {

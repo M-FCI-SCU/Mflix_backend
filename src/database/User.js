@@ -6,18 +6,26 @@ module.exports = class User {
     async register({ name, email, password }) {
         try {
             password = await bcrypt.hash(password, saltRounds)
-            let res = await db().collection('users').insertOne({ name, email, password })
-            return {
-                type: 'success',
-                message: "register successfuly",
-                data: true
+            if (name && email && password) {
+                let res = await db().collection('users').insertOne({ name, email, password })
+                return {
+                    type: 'success',
+                    message: "register successfuly",
+                    data: true
+                }
+            } else {
+                return {
+                    type: 'faild',
+                    message: "something go wrong please make sure you enter valid info!",
+                    data: false
+                }
             }
         } catch (error) {
             console.log("register error")
             console.log(error)
             return {
-                type: 'success',
-                message: "register successfuly",
+                type: 'faild',
+                message: "something go wrong please make sure you enter valid info!",
                 data: false
             }
         }

@@ -1,17 +1,36 @@
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
+  input CommentPayload{
+    name: String
+    email: String
+    movie_id: String
+    text: String
+  }
+  type Subscription {
+    commentCreated(moviesIds: [String]): Comment
+  }
   type Query {
+    checkUserExist: User
     login(email: String, password: String): User
     findMovies(skip: Int, limit: Int): [Movie]
     findMovieById(id: String): Movie
+    getComments(movie_id: String): [Comment]
 
   }
 
   type Mutation{
     register(name: String, email: String, password: String): RegisterResult
+    createComment(content: CommentPayload): Comment
   }
-
+  type Comment{
+    _id: String
+    name: String
+    email: String
+    movie_id: String
+    text: String
+    date: String
+  }
   type User{
     _id: String
     name: String
@@ -21,9 +40,10 @@ const typeDefs = gql`
   }
   type Movie{
     _id: String
+    poster: String
     plot: String
     genres: [String]
-    runtime: Int
+    runtime: Float
     cast: [String]
     num_mflix_comments: Int
     title: String
@@ -38,6 +58,7 @@ const typeDefs = gql`
     imdb: IMDB
     type: String
     tomatoes: Tomatoes
+    comments:[Comment]
 }
 type Tomatoes{
     viewer: Viewer,
@@ -50,8 +71,8 @@ type Awards{
 }
 
 type IMDB{
-  rating: Int,
-  votes: Int,
+  rating: Float,
+  votes: Float,
   id: Int
 }
 type Viewer{
@@ -60,7 +81,7 @@ type Viewer{
     meter: Int
   }
 
-  type RegisterResult{
+type RegisterResult{
     type: String
     message:String
     data: Boolean
