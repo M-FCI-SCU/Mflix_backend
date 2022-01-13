@@ -8,7 +8,7 @@ var Comment = new CommentClass()
 var { ObjectId } = require('mongodb');
 var { PubSub, withFilter } = require('graphql-subscriptions');
 var cloudinary = require("./cloudinary")
-const { finished } = require('stream/promises');
+//const { finished } = require('stream/promises');
 
 const pubsub = new PubSub();
 module.exports = {
