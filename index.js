@@ -1,4 +1,5 @@
 require('dotenv').config()
+const cors = require("cors")
 var jwt = require('jsonwebtoken');
 const { ApolloServer } = require('apollo-server-express');
 const { makeExecutableSchema } = require("@graphql-tools/schema")
@@ -20,7 +21,7 @@ var permissions = require("./src/middleware/permissions")
 
 function startExpressServer() {
     const app = express();
-
+    app.use(cors());
     // app.use(session({
     //     secret: 'This is a secret',
     //     cookie: {
