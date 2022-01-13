@@ -1,6 +1,14 @@
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
+  scalar Upload
+
+  type File {
+    filename: String!
+    mimetype: String!
+    encoding: String!
+    url: String
+  }
   input CommentPayload{
     name: String
     email: String
@@ -8,7 +16,7 @@ const typeDefs = gql`
     text: String
   }
   type Subscription {
-    commentCreated(moviesIds: [String]): Comment
+    CommentsSubscribe(moviesIds: [String]): CommentSubscribePayload
   }
   type Query {
     checkUserExist: User
@@ -20,8 +28,10 @@ const typeDefs = gql`
   }
 
   type Mutation{
+    singleUpload(file: Upload!): File!
     register(name: String, email: String, password: String): RegisterResult
     createComment(content: CommentPayload): Comment
+    deleteComment(movieId: String,commentId: String): Comment
   }
   type Comment{
     _id: String
@@ -30,6 +40,15 @@ const typeDefs = gql`
     movie_id: String
     text: String
     date: String
+  }
+  type CommentSubscribePayload{
+    _id: String
+    name: String
+    email: String
+    movie_id: String
+    text: String
+    date: String
+    action: String
   }
   type User{
     _id: String

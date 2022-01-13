@@ -9,23 +9,14 @@ const { StartMongodb } = require('./src/database/mongo_db')
 const typeDefs = require('./src/schema');
 const resolvers = require('./src/resolvers');
 const { ApolloServerPluginDrainHttpServer } = require('apollo-server-core');
+const {GraphQLUpload, graphqlUploadExpress} = require('graphql-upload');
 const express = require('express');
 const http = require('http');
 
-// var session = require('express-session');
-// var MongoDBStore = require('connect-mongodb-session')(session);
 
 var UserClass = require('./src/database/User')
 var User = new UserClass()
 var permissions = require("./src/middleware/permissions")
-// var store = new MongoDBStore({
-//     uri: `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASS}@cluster0.ag5hi.mongodb.net/sample_mflix?retryWrites=true&w=majority`,
-//     collection: 'mySessions'
-// });
-// Catch errors
-// store.on('error', function (error) {
-//     console.log(error);
-// });
 
 function startExpressServer() {
     const app = express();
@@ -55,14 +46,14 @@ function startExpressServer() {
     //     }
     //     next()
     // })
+    
+    //Upload file middleware
+    app.use(graphqlUploadExpress());
     //================jsonwebtoken======================
     app.use(async (req, res, next) => {
         if (req.headers.authorization) {
             var decoded = jwt.verify(req.headers.authorization, process.env.JWTSECRETKEY);
-            console.log('decoded')
-            console.log(decoded)
             let results = await User.findUserByEmail(decoded.email)
-            console.log(results)
             if (results) {
                 req.currentUser = results
             } else {
@@ -120,7 +111,7 @@ async function startApolloServer(typeDefs, resolvers, app) {
 
     server.applyMiddleware({ app });
 
-    await new Promise(resolve => httpServer.listen({ port: 5000 }, resolve));
+    await new Promise(resolve => httpServer.listen({ port: process.env.PORT || 5000}, resolve));
     console.log(`🚀 Server ready at http://localhost:5000${server.graphqlPath}`);
 }
 

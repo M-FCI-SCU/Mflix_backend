@@ -24,4 +24,9 @@ module.exports = class Comments {
         let data = await db().collection('comments').insertOne(payload)
         return { _id: data.insertedId, ...payload }
     }
+
+    async deleteComment(movieId, commentId) {
+        await db().collection('comments').deleteOne({ _id: new ObjectId(commentId) })
+        return { movie_id: movieId, _id: commentId }
+    }
 }
