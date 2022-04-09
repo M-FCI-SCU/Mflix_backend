@@ -19,6 +19,7 @@ const typeDefs = gql`
     CommentsSubscribe(moviesIds: [String]): CommentSubscribePayload
   }
   type Query {
+    createSnapshots: Boolean
     checkUserExist: User
     login(email: String, password: String): User
     findMovies(skip: Int, limit: Int): [Movie]
@@ -28,7 +29,7 @@ const typeDefs = gql`
   }
 
   type Mutation{
-    singleUpload(file: Upload!): File!
+    singleUpload(files: [Upload]): File
     register(name: String, email: String, password: String): RegisterResult
     createComment(content: CommentPayload): Comment
     deleteComment(movieId: String,commentId: String): Comment

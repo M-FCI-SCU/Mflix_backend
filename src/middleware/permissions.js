@@ -1,5 +1,5 @@
 let { rule, shield, and, or } = require("graphql-shield")
-const db = require("../database/mongo_db").get_MFLIX_DB
+const db = require("../models/mongo_db").get_MFLIX_DB
 var { ObjectId } = require('mongodb');
 
 const isAuthenticated = rule()((parent, args, { currentUser }) => {

@@ -1,4 +1,4 @@
-const db = require("./mongo_db").get_MFLIX_DB
+const db = require("../models/mongo_db").get_MFLIX_DB
 var { ObjectId } = require('mongodb');
 
 module.exports = class Movie {
@@ -12,6 +12,7 @@ module.exports = class Movie {
         ]).toArray()
         // console.log('data')
         // console.log(data)
+        console.log('rererere-----------------------------------------')
         return data
     }
 
